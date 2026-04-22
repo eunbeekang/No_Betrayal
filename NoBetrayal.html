@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배신은 안하지 동해 여행</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #F8FAFC;
+            color: #334155;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #0284C7;
+            color: #0284C7;
+            font-weight: 600;
+        }
+
+        .timeline-item {
+            transition: all 0.2s ease;
+        }
+        
+        .timeline-item:hover {
+            transform: translateX(5px);
+            background-color: #F1F5F9;
+        }
+
+        .timeline-content-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Chosen Palette: Warm Coastal Sand & Sky Blue (Background: Slate 50, Primary: Sky 600, Text: Slate 700) -->
+    <!-- Application Structure Plan: The SPA uses a dashboard structure divided into four main functional tabs: '개요 (Overview)', '일정표 (Timeline)', '준비물/R&R (Preparation)', and '예산 (Budget)'. This structure was chosen because it transforms a linear document into a task-oriented tool. Users can quickly check the address, see what's happening 'now' via the interactive timeline, review their packing list, or understand costs without scrolling through a wall of text. -->
+    <!-- Visualization & Content Choices: 
+         1. Overview -> Goal: Quick Facts -> Presentation: Metric Cards -> Interaction: None -> Justification: Immediate access to crucial info (dates, address, headcount).
+         2. Timeline -> Goal: Inform/Organize -> Presentation: Interactive Vertical List -> Interaction: Day 1/Day 2 toggle, Click to expand details -> Justification: Keeps the UI clean while allowing users to drill down into specific responsibilities for a given time slot.
+         3. Preparation -> Goal: Organize -> Presentation: Kanban-style Grid -> Interaction: Clickable checkboxes -> Justification: Gamifies and clarifies packing duties.
+         4. Budget -> Goal: Compare/Inform -> Presentation: Chart.js Doughnut Chart -> Interaction: Hover tooltips -> Justification: Visually breaks down expected costs, making financial planning transparent. (Chart.js used, NO SVG/Mermaid). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🌊</span>
+                    <h1 class="text-xl font-bold text-slate-800 tracking-tight">배신은 안하지</h1>
+                </div>
+            </div>
+            <div class="flex space-x-6 overflow-x-auto" id="nav-tabs">
+                <button onclick="app.switchTab('overview')" class="tab-btn active pb-3 px-1 text-sm font-medium text-slate-500 whitespace-nowrap" data-target="overview">모임 개요</button>
+                <button onclick="app.switchTab('timeline')" class="tab-btn pb-3 px-1 text-sm font-medium text-slate-500 whitespace-nowrap" data-target="timeline">세부 일정</button>
+                <button onclick="app.switchTab('prep')" class="tab-btn pb-3 px-1 text-sm font-medium text-slate-500 whitespace-nowrap" data-target="prep">준비물 & 역할</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+
+        <section id="overview" class="tab-content block">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">행사 개요</h2>
+                <p class="text-slate-600">이번 동해 모임의 핵심 정보를 한눈에 확인하세요. 유아를 동반한 모임인 만큼 이동 동선을 최소화하고 휴식에 집중하는 컨셉입니다.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+                    <div class="text-4xl mb-3">📅</div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">일정</h3>
+                    <p class="text-lg font-bold text-slate-800">2026.06.06 - 06.07</p>
+                    <p class="text-sm text-slate-500">1박 2일 (토~일)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+                    <div class="text-4xl mb-3">🏠</div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">숙소</h3>
+                    <p class="text-lg font-bold text-slate-800">월소택지길 8</p>
+                    <p class="text-sm text-slate-500">입실 15:00 / 퇴실 11:00</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+                    <div class="text-4xl mb-3">👨‍👩‍👧‍👦</div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">참석 인원</h3>
+                    <p class="text-lg font-bold text-slate-800">총 10명</p>
+                    <p class="text-sm text-slate-500">성인 8명, 유아 2명</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
+                    <div class="text-4xl mb-3">☕</div>
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">모임 컨셉</h3>
+                    <p class="text-lg font-bold text-slate-800">힐링 & 친목 도모</p>
+                    <p class="text-sm text-slate-500">여유로운 동선 및 휴식 위주</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline" class="tab-content hidden">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">세부 일정표</h2>
+                    <p class="text-slate-600">일자별 일정을 확인하고, 각 항목을 클릭하여 상세 내용과 담당자를 확인하세요.</p>
+                </div>
+                <div class="flex bg-slate-200 p-1 rounded-lg">
+                    <button onclick="app.renderTimeline(1)" id="btn-day1" class="px-4 py-2 text-sm font-semibold rounded-md bg-white shadow-sm text-sky-700">1일 차 (6/6 토)</button>
+                    <button onclick="app.renderTimeline(2)" id="btn-day2" class="px-4 py-2 text-sm font-semibold rounded-md text-slate-600 hover:text-slate-800">2일 차 (6/7 일)</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div id="timeline-container" class="divide-y divide-slate-100">
+                </div>
+            </div>
+        </section>
+
+        <section id="prep" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">준비물 및 역할 분담 (R&R)</h2>
+                <p class="text-slate-600">원활한 모임을 위해 각자 챙겨야 할 물품과 역할을 확인하세요. 리스트를 클릭하여 체크할 수 있습니다.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                        <span class="text-xl">📦</span>
+                        <h3 class="text-lg font-bold text-slate-800">공용 준비물</h3>
+                    </div>
+                    <ul class="space-y-2" id="list-common"></ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                        <span class="text-xl">🎒</span>
+                        <h3 class="text-lg font-bold text-slate-800">개인 준비물</h3>
+                    </div>
+                    <ul class="space-y-2" id="list-personal"></ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 border-t-4 border-t-amber-300">
+                    <div class="flex items-center gap-2 mb-4 border-b pb-2">
+                        <span class="text-xl">👶</span>
+                        <h3 class="text-lg font-bold text-slate-800">유아 준비물</h3>
+                    </div>
+                    <ul class="space-y-2" id="list-baby"></ul>
+                </div>
+            </div>
+
+            <div class="bg-sky-50 rounded-xl p-6 border border-sky-100">
+                <h3 class="text-lg font-bold text-sky-900 mb-4 flex items-center gap-2">
+                    <span>🤝</span> 역할 분담 (예시)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <p class="text-xs font-bold text-sky-600 uppercase tracking-wide mb-1">총무 및 결제 담당</p>
+                        <p class="font-medium text-slate-800">설정은</p>
+                        <p class="text-sm text-slate-500 mt-1">결제 담당</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <p class="text-xs font-bold text-sky-600 uppercase tracking-wide mb-1">운전</p>
+                        <p class="font-medium text-slate-800">김재우, 김용성, 설정은, 이영훈</p>
+                        <p class="text-sm text-slate-500 mt-1">차량 운행</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <p class="text-xs font-bold text-sky-600 uppercase tracking-wide mb-1">식사 및 정리</p>
+                        <p class="font-medium text-slate-800">전원 다 함께</p>
+                        <p class="text-sm text-slate-500 mt-1">설거지 당번은 게임으로 결정</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const scheduleData = {
+            day1: [
+                { time: "12:30 ~ 14:00", title: "개별 출발 및 동해 집결 (점심 식사)", location: "동해 시내 식당", icon: "🍽️", details: "아기 의자/룸이 있는 넓은 식당 섭외 요망. 식사 후 인근 이마트 동해점 이동." },
+                { time: "14:00 ~ 15:00", title: "장보기 (식재료 및 주류 구매)", location: "이마트 동해점", icon: "🛒", details: "[구매조]: 3~4명 인원 차출. [육아/휴식조]: 식당 인근 카페 대기." },
+                { time: "15:00 ~ 15:30", title: "숙소 도착 및 체크인", location: "숙소 (월소택지길 8)", icon: "🏠", details: "짐 풀기 및 방 배정. 아기 낮잠 및 휴식 시간." },
+                { time: "15:30 ~ 17:30", title: "자유 시간 및 인근 산책", location: "숙소 인근", icon: "🚶", details: "묵호항, 도째비골 스카이밸리 인근 산책 (도보/차량 5분). 희망자에 한해 자유롭게 진행." },
+                { time: "17:30 ~ 18:00", title: "저녁 식사 준비", location: "숙소", icon: "🔪", details: "바비큐 세팅 및 식사 준비 (채소 씻기 등)." },
+                { time: "18:00 ~ 21:00", title: "저녁 식사 및 친목의 시간", location: "숙소", icon: "🥩", details: "바비큐 파티 또는 회 포장 배달. 유아 취침 및 케어 동시 진행." },
+                { time: "21:00 ~", title: "자유 시간 및 취침", location: "숙소", icon: "🌙", details: "실내 뒷정리 및 2차 (가벼운 다과)." }
+            ],
+            day2: [
+                { time: "08:30 ~ 10:00", title: "기상 및 아침 식사", location: "숙소", icon: "🍳", details: "간편식 (밀키트, 라면, 빵 등). 유아 이유식 진행." },
+                { time: "10:00 ~ 11:00", title: "짐 정리 및 체크아웃", location: "숙소", icon: "🧳", details: "숙소 내부 분리수거 및 정리정돈." },
+                { time: "11:00 ~ 12:30", title: "점심식사", location: "망상해수욕장 인근", icon: "🚗", details: "유모차 진입이 수월한 대형 베이커리 카페 이동." },
+                { time: "12:30 ~ 14:30", title: "티타임 및 단체 사진 촬영", location: "대형 카페", icon: "☕", details: "커피 및 가벼운 브런치. 해변 산책 및 단체 사진 촬영." },
+                { time: "14:30 ~", title: "해산 및 상경", location: "각자 자택으로", icon: "👋", details: "안전 귀가." }
+            ]
+        };
+
+        const prepItems = {
+            common: ["상비약 (소화제, 해열제, 밴드)", "블루투스 스피커", "보드게임"],
+            personal: ["잠옷", "여벌옷", "개인 세면도구", "휴대폰 충전기"],
+            baby: ["이유식(아린 엄마)", "기저귀", "손수건", "젖병", "분유", "비판텐", "물티슈", "옷", "면봉", "젖병 포트(아린 엄마)", "유모차", "아기용 상비약", "쪽쪽이"]
+        };
+
+        const app = {
+            init() {
+                this.renderList('list-common', prepItems.common);
+                this.renderList('list-personal', prepItems.personal);
+                this.renderList('list-baby', prepItems.baby);
+                this.renderTimeline(1);
+            },
+
+            switchTab(tabId) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active', 'border-bottom'));
+                
+                document.getElementById(tabId).classList.remove('hidden');
+                document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
+            },
+
+            renderTimeline(day) {
+                const btn1 = document.getElementById('btn-day1');
+                const btn2 = document.getElementById('btn-day2');
+                
+                if (day === 1) {
+                    btn1.className = "px-4 py-2 text-sm font-semibold rounded-md bg-white shadow-sm text-sky-700";
+                    btn2.className = "px-4 py-2 text-sm font-semibold rounded-md text-slate-600 hover:text-slate-800 transition-colors";
+                } else {
+                    btn2.className = "px-4 py-2 text-sm font-semibold rounded-md bg-white shadow-sm text-sky-700";
+                    btn1.className = "px-4 py-2 text-sm font-semibold rounded-md text-slate-600 hover:text-slate-800 transition-colors";
+                }
+
+                const container = document.getElementById('timeline-container');
+                const data = day === 1 ? scheduleData.day1 : scheduleData.day2;
+                
+                container.innerHTML = data.map((item, index) => `
+                    <div class="timeline-item p-4 sm:p-6 cursor-pointer group" onclick="app.toggleTimelineDetail(${index})">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div class="flex items-center gap-4">
+                                <div class="text-2xl w-10 text-center">${item.icon}</div>
+                                <div>
+                                    <p class="text-sm font-bold text-sky-600">${item.time}</p>
+                                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-sky-700 transition-colors">${item.title}</h4>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-3 py-1 rounded-full self-start sm:self-auto">
+                                <span>📍</span> ${item.location}
+                            </div>
+                        </div>
+                        <div id="detail-${index}" class="timeline-content-hidden mt-4 pl-14 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <p><strong>비고 및 담당:</strong> ${item.details}</p>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            toggleTimelineDetail(index) {
+                const el = document.getElementById(`detail-${index}`);
+                if (el.classList.contains('timeline-content-hidden')) {
+                    el.classList.remove('timeline-content-hidden');
+                    el.classList.add('block');
+                } else {
+                    el.classList.add('timeline-content-hidden');
+                    el.classList.remove('block');
+                }
+            },
+
+            renderList(containerId, items) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = items.map((item, idx) => `
+                    <li class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer" onclick="this.querySelector('input').click()">
+                        <input type="checkbox" class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500 cursor-pointer" onclick="event.stopPropagation()">
+                        <span class="text-slate-700 text-sm font-medium select-none">${item}</span>
+                    </li>
+                `).join('');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
